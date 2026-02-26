@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<title>24Klokke</title>
+
+<style>
+body{
+    background:#111;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    margin:0;
+    font-family:Arial, sans-serif;
+    color:white;
+}
+
+.clock{
+    position:relative;
+    width:420px;
+    height:420px;
+}
+
+/* --- RINGER --- */
+
+.circle{
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    border-radius:50%;
+    box-sizing:border-box;
+}
+
+.day-ring{
+    width:420px;
+    height:420px;
+    border:20px solid gold;
+    opacity:0.2;
+    box-shadow:0 0 30px rgba(255,200,50,0.3);
+    transition:opacity 1s ease;
+}
+
+.night-ring{
+    width:370px;
+    height:370px;
+    border:20px solid #4a6cff;
+    opacity:0.2;
+    box-shadow:0 0 30px rgba(80,120,255,0.3);
+    transition:opacity 1s ease;
+}
+
+.minute-ring{
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    width:300px;
+    height:300px;
+    border-radius:50%;
+    transition:background 0.4s ease;
+}
+
+/* --- MIDTSIRKEL --- */
+
+.center{
+    width:260px;
+    height:260px;
+    background:#222;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+}
+
+/* VISERE */
+.hand{
+    position:absolute;
+    bottom:50%;
+    left:50%;
+    transform-origin:bottom;
+    background:white;
+}
+
+.hour{
+    width:4px;
+    height:135px; /* når helt ut til dagringen */
+    background:linear-gradient(to top, #444, #ddd);
+    border-radius:5px;
+    z-index:5;
+    transition: transform 0.3s ease-in-out;
+}
+
+/* Minuttviser litt slankere */
+.minute{
+    width:2px;
+    height:165px;
+    background:white;
+    border-radius:2px;
+    z-index:4;
+    transition: transform 0.3s ease-in-out;
+}
+
+/* --- TALL --- */
+
+.number{
+    position:absolute;
+    font-size:12px;
+    transform:translate(-50%,-50%);
+}
+
+.day-number{
+    color:#222;
+    font-weight:bold;
+}
+
+.night-number{
+    color:white;
+    font-weight:bold;
+}
+
+/* --- DIGITAL --- */
+
+.digital{
+    font-size:2em;
+    margin-bottom:5px;
+}
+
+.hub{
+    position:absolute;
+    width:18px;
+    height:18px;
+    background:white;
+    border-radius:50%;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    z-index:10;
+}
+</style>
+
+</head>
+<body>
+
+<div class="clock">
+
+<div class="circle day-ring"></div>
+<div class="circle night-ring"></div>
+<div class="minute-ring" id="minuteRing"></div>
+
+<div class="hand hour" id="hourHand"></div>
+<div class="hand minute" id="minuteHand"></div>
+
+<div class="circle center">
+    <div class="digital" id="digital"></div>
+    <div id="mode"></div>
+</div>
+
+<div class="hub"></div>
+
+</div>
+
+<script>
+const clock = document.querySelector(".clock");
+
+/* --- DAG TALL 12-23 --- */
+
+for(let i=0;i<12;i++){
+    let number = document.createElement("div");
+    number.className="number day-number";
+    number.innerText = (12+i).toString().padStart(2,"0");
+
+    let angle = (i/12)*360;
+    let radius = 200;
+
+    number.style.left = 210 + radius*Math.sin(angle*Math.PI/180) + "px";
+    number.style.top  = 210 - radius*Math.cos(angle*Math.PI/180) + "px";
+
+    clock.appendChild(number);
+}
+
+/* --- NATT TALL 00-11 --- */
+
+for(let i=0;i<12;i++){
+    let number = document.createElement("div");
+    number.className="number night-number";
+    number.innerText = i.toString().padStart(2,"0");
+
+    let angle = (i/12)*360;
+    let radius = 175;
+
+    number.style.left = 210 + radius*Math.sin(angle*Math.PI/180) + "px";
+    number.style.top  = 210 - radius*Math.cos(angle*Math.PI/180) + "px";
+
+    clock.appendChild(number);
+}
+
+/* --- KLOKKE OPPDATERING --- */
+
+function updateClock(){
+
+    const now = new Date();
+    const h = now.getHours();
+    const m = now.getMinutes();
+    const s = now.getSeconds();
+
+    /* Visere */
+    const hourDeg = ((h % 12) + m/60) * 30;
+    const minuteDeg = (m/60)*360;
+
+    document.getElementById("hourHand").style.transform =
+        `translate(-50%,0) rotate(${hourDeg}deg)`;
+
+    document.getElementById("minuteHand").style.transform =
+        `translate(-50%,0) rotate(${minuteDeg}deg)`;
+
+    /* Digital */
+    document.getElementById("digital").innerText =
+        now.toLocaleTimeString("no-NO",{hour:"2-digit",minute:"2-digit"});
+
+    /* Dag / natt */
+    const dayRing = document.querySelector(".day-ring");
+    const nightRing = document.querySelector(".night-ring");
+
+    if(h >= 12 && h < 24){
+        dayRing.style.opacity = "1";
+        nightRing.style.opacity = "0.2";
+        document.getElementById("mode").innerText = "DAG";
+    }else{
+        nightRing.style.opacity = "1";
+        dayRing.style.opacity = "0.2";
+        document.getElementById("mode").innerText = "NATT";
+    }
+
+    /* Minutt-progress ring */
+    const minutePercent = m / 60;
+
+    document.getElementById("minuteRing").style.background =
+        `conic-gradient(
+            white ${minutePercent*360}deg,
+            transparent ${minutePercent*360}deg
+        )`;
+}
+
+setInterval(updateClock,1000);
+updateClock();
+
+</script>
+
+</body>
+</html>
