@@ -2,7 +2,7 @@
 <html lang="no">
 <head>
 <meta charset="UTF-8">
-<title>24Klokke -locale</title>
+<title>24Klokke - Læringsklokke</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 @font-face {
@@ -12,7 +12,6 @@
     font-style: normal;
     font-display: swap;
 }
-
 body {
     background: #0b1020;
     display: flex;
@@ -25,7 +24,6 @@ body {
     color: white;
     transition: background 4s ease;
 }
-
 .clock-container {
     position: relative;
     width: min(90vw, 420px);
@@ -34,7 +32,6 @@ body {
     max-height: 420px;
     margin: 1rem auto;
 }
-
 .clock {
     position: absolute;
     top: 0;
@@ -42,7 +39,6 @@ body {
     width: 100%;
     height: 100%;
 }
-
 /* Rings */
 .circle {
     position: absolute;
@@ -52,21 +48,18 @@ body {
     border-radius: 50%;
     box-sizing: border-box;
 }
-
 .day-ring {
     border: solid gold;
     opacity: 0.15;
     box-shadow: 0 0 10px rgba(255,200,50,0.2);
     transition: opacity 4s ease, box-shadow 4s ease;
 }
-
 .night-ring {
     border: solid #4a6cff;
     opacity: 0.15;
     box-shadow: 0 0 10px rgba(80,120,255,0.2);
     transition: opacity 4s ease, box-shadow 4s ease;
 }
-
 .minute-ring {
     position: absolute;
     top: 50%;
@@ -76,7 +69,6 @@ body {
     background: conic-gradient(#aaaaaa 0deg, rgba(255,255,255,0.08) 0deg); /* Subtle gray */
     transition: background 0.6s ease;
 }
-
 /* Center & Hub */
 .center {
     background: #222;
@@ -86,7 +78,6 @@ body {
     left: 50%;
     transform: translate(-50%, -50%);
 }
-
 .hub {
     position: absolute;
     background: white;
@@ -96,7 +87,6 @@ body {
     transform: translate(-50%, -50%);
     z-index: 10;
 }
-
 /* Hands */
 .hand {
     position: absolute;
@@ -105,7 +95,6 @@ body {
     transform-origin: bottom;
     border-radius: 2px;
 }
-
 .hand::after {
     content: '';
     position: absolute;
@@ -118,11 +107,9 @@ body {
     border-right: 3px solid transparent;
     border-bottom: 6px solid inherit; /* Inherit from hand background */
 }
-
 .hour { width: 2px; z-index: 4; transition: background 1s ease; }
 .minute { width: 2px; background: white; z-index: 4; box-shadow: 0 0 4px rgba(170,170,170,0.5); /* Gray glow */ }
 .second { width: 1px; background: #ff4d4d; box-shadow: 0 0 8px #ff4d4d66; z-index: 5; transition: transform 0.18s cubic-bezier(0.4, 2.0, 0.2, 1); }
-
 /* Numbers & Marks */
 .number {
     position: absolute;
@@ -130,10 +117,8 @@ body {
     font-weight: bold;
     transform: translate(-50%, -50%);
 }
-
-.day-number { color: #222; }
+.day-number { color: #222; } /* Dark for better contrast on day */
 .night-number { color: white; }
-
 .minute-tick {
     position: absolute;
     width: 1.5px;
@@ -144,7 +129,6 @@ body {
     z-index: 3;
     border-radius: 1px;
 }
-
 /* Labels */
 #minuteLabel {
     position: absolute;
@@ -159,8 +143,8 @@ body {
     background: rgba(2,10,24,0.78);
     border: 1px solid rgba(120,190,255,0.22);
     box-shadow: 0 0 10px rgba(0,229,255,0.35), inset 0 0 8px rgba(0,140,255,0.18);
+    transition: color 4s ease, background 4s ease, border 4s ease, box-shadow 4s ease;
 }
-
 .mode-label {
     margin: 0.5rem 0;
     padding: clamp(4px, 1.5vw, 6px) clamp(10px, 3.3vw, 14px);
@@ -172,8 +156,8 @@ body {
     background: linear-gradient(180deg, rgba(8,18,44,0.90) 0%, rgba(4,10,26,0.90) 100%);
     border: 1px solid rgba(120,190,255,0.18);
     box-shadow: 0 0 14px rgba(0,160,255,0.18), inset 0 0 10px rgba(0,140,255,0.12);
+    transition: color 4s ease, background 4s ease, border 4s ease, box-shadow 4s ease;
 }
-
 .digital-box {
     margin-top: 0.5rem;
     padding: clamp(12px, 4.8vw, 20px) clamp(30px, 12vw, 50px);
@@ -181,16 +165,16 @@ body {
     border: 1px solid rgba(120,190,255,0.18);
     border-radius: 10px;
     box-shadow: 0 0 22px rgba(0,160,255,0.22), inset 0 0 14px rgba(0,140,255,0.18);
+    transition: background 4s ease, border 4s ease, box-shadow 4s ease;
 }
-
 .digital-display {
     font-family: "DSEG7ClassicLocal", "Courier New", monospace;
     font-size: clamp(1.8em, 7vw, 3em);
     color: #b9f2ff;
     letter-spacing: clamp(3px, 1.4vw, 6px);
     text-shadow: 0 0 8px rgba(0,229,255,0.85), 0 0 22px rgba(0,160,255,0.55);
+    transition: color 4s ease, text-shadow 4s ease;
 }
-
 /* Toggle */
 .toggle-container {
     margin: 0.5rem 0;
@@ -198,16 +182,14 @@ body {
     align-items: center;
     gap: 0.8rem;
     font-size: clamp(0.8rem, 2.5vw, 0.95rem);
+    transition: color 4s ease;
 }
-
 .toggle-switch {
     position: relative;
     width: 44px;
     height: 24px;
 }
-
 .toggle-switch input { opacity: 0; width: 0; height: 0; }
-
 .slider {
     position: absolute;
     cursor: pointer;
@@ -216,7 +198,6 @@ body {
     border-radius: 24px;
     transition: .4s;
 }
-
 .slider:before {
     position: absolute;
     content: "";
@@ -228,43 +209,120 @@ body {
     border-radius: 50%;
     transition: .4s;
 }
-
 input:checked + .slider { background: #2196F3; }
 input:checked + .slider:before { transform: translateX(20px); }
+/* Slider container */
+#sliderContainer {
+    position: absolute;
+    left: calc(50% - 240px); /* Closer to the clock on large screens */
+    top: 50%;
+    transform: translateY(-50%);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    z-index: 20; /* Ensure above other elements */
+}
+#timeSlider {
+    -webkit-appearance: slider-vertical;
+    appearance: slider-vertical;
+    width: 8px;
+    height: clamp(200px, 70vh, 300px); /* Responsive height */
+    background: transparent;
+    outline: none;
+}
+#timeSlider::-webkit-slider-runnable-track {
+    width: 8px;
+    height: 100%;
+    background: #444;
+    border-radius: 4px;
+}
+#timeSlider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: #2196F3;
+    border-radius: 50%;
+    cursor: pointer;
+    margin-left: -6px; /* Center thumb */
+}
+#timeSlider::-moz-range-track {
+    width: 8px;
+    height: 100%;
+    background: #444;
+    border-radius: 4px;
+}
+#timeSlider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: #2196F3;
+    border-radius: 50%;
+    cursor: pointer;
+}
+#timeSlider::-ms-track {
+    width: 8px;
+    height: 100%;
+    background: transparent;
+    border-color: transparent;
+    color: transparent;
+}
+#timeSlider::-ms-fill-lower, #timeSlider::-ms-fill-upper {
+    background: #444;
+    border-radius: 4px;
+}
+#timeSlider::-ms-thumb {
+    width: 20px;
+    height: 20px;
+    background: #2196F3;
+    border-radius: 50%;
+    cursor: pointer;
+    margin-left: -6px;
+}
+@media (max-width: 480px) {
+    #sliderContainer {
+        left: -10px; /* Adjust for smaller screens */
+    }
+    #timeSlider {
+        height: 200px; /* Shorter on very small screens */
+    }
+}
 </style>
 </head>
 <body>
-
+<div id="sliderContainer">
+    <input type="range" id="timeSlider" min="0" max="1439" step="1" orient="vertical">
+</div>
 <div class="clock-container">
     <div class="clock">
         <div class="circle day-ring"></div>
         <div class="circle night-ring"></div>
         <div class="minute-ring" id="minuteRing"></div>
-
         <div class="hand hour" id="hourHand"></div>
         <div class="hand minute" id="minuteHand"></div>
         <div class="hand second" id="secondHand"></div>
-
         <div id="minuteLabel"></div>
         <div class="center"></div>
         <div class="hub"></div>
     </div>
 </div>
-
 <div class="mode-label" id="mode"></div>
-
-<div class="toggle-container">
+<div class="toggle-container" id="secondsToggleContainer">
     <label for="secondsToggle">Vis sekundviser</label>
     <label class="toggle-switch">
         <input type="checkbox" id="secondsToggle" checked>
         <span class="slider"></span>
     </label>
 </div>
-
-<div class="digital-box">
+<div class="toggle-container" id="manualToggleContainer">
+    <label for="manualToggle">Manuell tid</label>
+    <label class="toggle-switch">
+        <input type="checkbox" id="manualToggle">
+        <span class="slider"></span>
+    </label>
+</div>
+<div class="digital-box" id="digitalBox">
     <div class="digital-display" id="digital"></div>
 </div>
-
 <script>
 const clock = document.querySelector(".clock");
 const hourHand = document.getElementById("hourHand");
@@ -274,28 +332,36 @@ const minuteRing = document.getElementById("minuteRing");
 const minuteLabel = document.getElementById("minuteLabel");
 const modeLabel = document.getElementById("mode");
 const digital = document.getElementById("digital");
+const digitalBox = document.getElementById("digitalBox");
 const toggle = document.getElementById("secondsToggle");
+const manualToggle = document.getElementById("manualToggle");
+const timeSlider = document.getElementById("timeSlider");
+const sliderContainer = document.getElementById("sliderContainer");
+const secondsToggleContainer = document.getElementById("secondsToggleContainer");
+const manualToggleContainer = document.getElementById("manualToggleContainer");
 const dayRing = document.querySelector(".day-ring");
 const nightRing = document.querySelector(".night-ring");
 const centerDiv = document.querySelector(".center");
 const hub = document.querySelector(".hub");
-
 let showSeconds = localStorage.getItem("showSeconds") !== "false";
 toggle.checked = showSeconds;
 secondHand.style.display = showSeconds ? "block" : "none";
-
 toggle.addEventListener("change", () => {
     showSeconds = toggle.checked;
     localStorage.setItem("showSeconds", showSeconds);
     secondHand.style.display = showSeconds ? "block" : "none";
 });
-
+let manualMode = false;
+manualToggle.addEventListener("change", () => {
+    manualMode = manualToggle.checked;
+    sliderContainer.style.display = manualMode ? "flex" : "none";
+    updateClock();
+});
+timeSlider.addEventListener("input", updateClock);
 let center, borderW, dayR, nightR, labelR, minuteRingRadius;
-
 const dayNumbers = [];
 const nightNumbers = [];
 const minuteTicks = [];
-
 function initElements() {
     dayNumbers.forEach(n => n.remove());
     nightNumbers.forEach(n => n.remove());
@@ -303,7 +369,6 @@ function initElements() {
     dayNumbers.length = 0;
     nightNumbers.length = 0;
     minuteTicks.length = 0;
-
     for (let i = 0; i < 12; i++) {
         let num = document.createElement("div");
         num.className = "number day-number";
@@ -315,7 +380,6 @@ function initElements() {
         clock.appendChild(num);
         dayNumbers.push(num);
     }
-
     for (let i = 0; i < 12; i++) {
         let num = document.createElement("div");
         num.className = "number night-number";
@@ -327,7 +391,6 @@ function initElements() {
         clock.appendChild(num);
         nightNumbers.push(num);
     }
-
     for (let i = 0; i < 60; i++) {
         let tick = document.createElement("div");
         tick.className = "minute-tick";
@@ -341,7 +404,6 @@ function initElements() {
         minuteTicks.push(tick);
     }
 }
-
 function setSizes() {
     const size = clock.clientWidth;
     center = size / 2;
@@ -353,99 +415,131 @@ function setSizes() {
     nightR = size * 175 / 420;
     labelR = size * 115 / 420;
     minuteRingRadius = minuteRingW / 2;
-
     dayRing.style.width = size + "px";
     dayRing.style.height = size + "px";
     dayRing.style.borderWidth = borderW + "px";
-
     nightRing.style.width = size * 370 / 420 + "px";
     nightRing.style.height = size * 370 / 420 + "px";
     nightRing.style.borderWidth = borderW + "px";
-
     minuteRing.style.width = minuteRingW + "px";
     minuteRing.style.height = minuteRingW + "px";
-
     centerDiv.style.width = centerW + "px";
     centerDiv.style.height = centerW + "px";
-
     hourHand.style.height = size * 120 / 420 + "px";
     minuteHand.style.height = size * 170 / 420 + "px";
     secondHand.style.height = size * 185 / 420 + "px";
-
     hub.style.width = hubS + "px";
     hub.style.height = hubS + "px";
-
     initElements();
 }
-
 function getTwilightFactor(h, m) {
     const minOfDay = h * 60 + m;
-    const sunrise = 6 * 60;
-    const sunset = 18 * 60;
-    const window = 45;
+    const noon = 12 * 60;
+    const midnight = 0; // or 24*60, but since minOfDay is 0-1439
+    const window = 30; // 30 min fade window
 
-    let dSunrise = Math.abs(minOfDay - sunrise);
-    let dSunset = Math.abs(minOfDay - sunset);
+    // For noon transition (night to day)
+    let dNoon = minOfDay - noon;
+    if (dNoon >= -window && dNoon < 0) return (window + dNoon) / window; // fading in day
+    if (dNoon >= 0 && dNoon < window) return (dNoon + window) / (2 * window); // but adjust to smooth
 
-    if (dSunrise < window) return (window - dSunrise) / window;
-    if (dSunset < window) return (window - dSunset) / window;
-    return (minOfDay >= sunrise && minOfDay < sunset) ? 1 : 0;
+    // For midnight transition (day to night)
+    let dMidnight = (minOfDay < window) ? minOfDay : minOfDay - 1440;
+    if (dMidnight >= -window && dMidnight < 0) return 1 - ((window + dMidnight) / window); // fading out day
+    if (dMidnight >= 0 && dMidnight < window) return 1 - ((dMidnight + window) / (2 * window)); // adjust
+
+    // Full day or night
+    return (h >= 12) ? 1 : 0;
 }
-
 function updateClock() {
-    const now = new Date();
-    const h = now.getHours();
-    const m = now.getMinutes();
-    const s = now.getSeconds();
-
+    let h, m, s;
+    if (manualMode) {
+        const mins = parseInt(timeSlider.value);
+        h = Math.floor(mins / 60);
+        m = mins % 60;
+        s = 0;
+    } else {
+        const now = new Date();
+        h = now.getHours();
+        m = now.getMinutes();
+        s = now.getSeconds();
+        timeSlider.value = h * 60 + m;
+    }
     const hDeg = ((h % 12) + m / 60 + s / 3600) * 30;
     const mDeg = (m + s / 60) * 6;
     const sDeg = s * 6;
-
     hourHand.style.transform = `translateX(-50%) rotate(${hDeg}deg)`;
     minuteHand.style.transform = `translateX(-50%) rotate(${mDeg}deg)`;
     if (showSeconds) {
         secondHand.style.transform = `translateX(-50%) rotate(${sDeg}deg)`;
     }
-
     const colon = (s % 2 === 0) ? ":" : " ";
     digital.textContent = String(h).padStart(2, "0") + colon + String(m).padStart(2, "0");
-
     const tf = getTwilightFactor(h, m);
-
     dayRing.style.opacity = 0.15 + 0.85 * tf;
     dayRing.style.boxShadow = `0 0 ${10 + 30 * tf}px rgba(255,200,50,${0.2 + 0.5 * tf})`;
-
     nightRing.style.opacity = 0.15 + 0.85 * (1 - tf);
     nightRing.style.boxShadow = `0 0 ${10 + 30 * (1 - tf)}px rgba(80,120,255,${0.2 + 0.5 * (1 - tf)})`;
-
     const fromR = Math.round(42 * tf + 10 * (1 - tf));
     const fromG = Math.round(34 * tf + 19 * (1 - tf));
     const fromB = Math.round(8 * tf + 48 * (1 - tf));
     const toR = Math.round(15 * tf + 5 * (1 - tf));
     const toG = Math.round(15 * tf + 7 * (1 - tf));
     const toB = Math.round(15 * tf + 15 * (1 - tf));
-
     document.body.style.background = `radial-gradient(circle at center, rgb(${fromR},${fromG},${fromB}) 0%, rgb(${toR},${toG},${toB}) 70%)`;
-
-    modeLabel.textContent = tf > 0.65 ? "DAG/KVELD" : tf < 0.35 ? "NATT/MORGEN" : "SKUMRING";
-
-    const isDay = tf > 0.5;
-    hourHand.style.background = isDay ? '#ffd700' : '#4a6cff';
-
+    modeLabel.textContent = (h >= 12) ? "DAG/KVELD" : "NATT/MORGEN";
+    hourHand.style.background = (tf > 0.5) ? '#ffd700' : '#4a6cff';
     const minFrac = (m + s / 60) / 60;
     minuteRing.style.background = `conic-gradient(#aaaaaa ${minFrac * 360}deg, rgba(255,255,255,0.08) ${minFrac * 360}deg)`;
-
     const rad = (mDeg - 90) * Math.PI / 180;
     minuteLabel.style.left = center + labelR * Math.cos(rad) + "px";
     minuteLabel.style.top = center + labelR * Math.sin(rad) + "px";
     minuteLabel.textContent = String(m).padStart(2, "0");
+    // Adjust opacities for numbers
+    dayNumbers.forEach(n => n.style.opacity = 0.15 + 0.85 * tf);
+    nightNumbers.forEach(n => n.style.opacity = 0.15 + 0.85 * (1 - tf));
+    // Theme colors
+    const textR = Math.round(255 * tf + 185 * (1 - tf));
+    const textG = Math.round(215 * tf + 242 * (1 - tf));
+    const textB = Math.round(0 * tf + 255 * (1 - tf));
+    const textColor = `rgb(${textR},${textG},${textB})`;
+    const shadowR = Math.round(255 * tf + 0 * (1 - tf));
+    const shadowG = Math.round(200 * tf + 160 * (1 - tf));
+    const shadowB = Math.round(50 * tf + 255 * (1 - tf));
+    const borderR = Math.round(255 * tf + 120 * (1 - tf));
+    const borderG = Math.round(200 * tf + 190 * (1 - tf));
+    const borderB = Math.round(50 * tf + 255 * (1 - tf));
+    const bgFromR = Math.round(44 * tf + 8 * (1 - tf));
+    const bgFromG = Math.round(34 * tf + 18 * (1 - tf));
+    const bgFromB = Math.round(8 * tf + 44 * (1 - tf));
+    const bgToR = Math.round(26 * tf + 4 * (1 - tf));
+    const bgToG = Math.round(20 * tf + 10 * (1 - tf));
+    const bgToB = Math.round(4 * tf + 26 * (1 - tf));
+    // Apply to elements
+    modeLabel.style.color = textColor;
+    modeLabel.style.background = `linear-gradient(180deg, rgba(${bgFromR},${bgFromG},${bgFromB},0.90) 0%, rgba(${bgToR},${bgToG},${bgToB},0.90) 100%)`;
+    modeLabel.style.border = `1px solid rgba(${borderR},${borderG},${borderB},0.18)`;
+    modeLabel.style.boxShadow = `0 0 14px rgba(${shadowR},${shadowG},${shadowB},0.18), inset 0 0 10px rgba(${shadowR},${shadowG},${shadowB},0.12)`;
+    digital.style.color = textColor;
+    digital.style.textShadow = `0 0 8px rgba(${shadowR},${shadowG},${shadowB},0.85), 0 0 22px rgba(${shadowR},${shadowG},${shadowB},0.55)`;
+    digitalBox.style.background = `linear-gradient(180deg, rgba(${bgFromR},${bgFromG},${bgFromB},0.95) 0%, rgba(${bgToR},${bgToG},${bgToB},0.95) 100%)`;
+    digitalBox.style.border = `1px solid rgba(${borderR},${borderG},${borderB},0.18)`;
+    digitalBox.style.boxShadow = `0 0 22px rgba(${shadowR},${shadowG},${shadowB},0.22), inset 0 0 14px rgba(${shadowR},${shadowG},${shadowB},0.18)`;
+    minuteLabel.style.color = textColor;
+    minuteLabel.style.background = `rgba(${bgToR},${bgToG},${bgToB},0.78)`;
+    minuteLabel.style.border = `1px solid rgba(${borderR},${borderG},${borderB},0.22)`;
+    minuteLabel.style.boxShadow = `0 0 10px rgba(${shadowR},${shadowG},${shadowB},0.35), inset 0 0 8px rgba(${shadowR},${shadowG},${shadowB},0.18)`;
+    secondsToggleContainer.style.color = textColor;
+    manualToggleContainer.style.color = textColor;
+    // Minute ticks tint
+    const tickR = Math.round(255 * tf + 255 * (1 - tf));
+    const tickG = Math.round(255 * tf + 255 * (1 - tf));
+    const tickB = Math.round(255 * tf + 255 * (1 - tf));
+    minuteTicks.forEach(t => t.style.background = `rgba(${tickR},${tickG},${tickB},0.75)`);
 }
-
 setSizes();
 updateClock();
 setInterval(updateClock, 200);
-
 window.addEventListener("resize", () => {
     setSizes();
     updateClock();
