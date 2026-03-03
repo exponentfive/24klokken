@@ -214,25 +214,30 @@ input:checked + .slider:before { transform: translateX(20px); }
 /* Slider container */
 #sliderContainer {
     position: absolute;
-    left: calc(50% - 240px); /* Closer to the clock on large screens */
-    top: 50%;
-    transform: translateY(-50%);
+    top: -50px; /* Above the clock, adjusted for visibility */
+    left: 50%;
+    transform: translateX(-50%);
     display: none;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
+    gap: 1rem;
     z-index: 20; /* Ensure above other elements */
+    width: 100%;
+    justify-content: center;
+    padding: 0 1rem;
+    box-sizing: border-box;
 }
 #timeSlider {
-    -webkit-appearance: slider-vertical;
-    appearance: slider-vertical;
-    width: 8px;
-    height: clamp(200px, 70vh, 300px); /* Responsive height */
+    -webkit-appearance: none;
+    appearance: none;
+    height: 8px;
+    width: clamp(200px, 70vw, 300px); /* Responsive width */
     background: transparent;
     outline: none;
 }
 #timeSlider::-webkit-slider-runnable-track {
-    width: 8px;
-    height: 100%;
+    height: 8px;
+    width: 100%;
     background: #444;
     border-radius: 4px;
 }
@@ -244,11 +249,11 @@ input:checked + .slider:before { transform: translateX(20px); }
     background: #2196F3;
     border-radius: 50%;
     cursor: pointer;
-    margin-left: -6px; /* Center thumb */
+    margin-top: -6px; /* Center thumb */
 }
 #timeSlider::-moz-range-track {
-    width: 8px;
-    height: 100%;
+    height: 8px;
+    width: 100%;
     background: #444;
     border-radius: 4px;
 }
@@ -260,8 +265,8 @@ input:checked + .slider:before { transform: translateX(20px); }
     cursor: pointer;
 }
 #timeSlider::-ms-track {
-    width: 8px;
-    height: 100%;
+    height: 8px;
+    width: 100%;
     background: transparent;
     border-color: transparent;
     color: transparent;
@@ -276,23 +281,42 @@ input:checked + .slider:before { transform: translateX(20px); }
     background: #2196F3;
     border-radius: 50%;
     cursor: pointer;
-    margin-left: -6px;
+    margin-top: -6px;
+}
+#hourInput, #minuteInput {
+    padding: 0.5rem;
+    border-radius: 4px;
+    border: 1px solid #2196F3;
+    background: #222;
+    color: white;
+    font-size: 1rem;
+    width: 50px;
+    text-align: center;
+}
+.colon {
+    color: white;
+    font-size: 1rem;
 }
 @media (max-width: 480px) {
     #sliderContainer {
-        left: -10px; /* Adjust for smaller screens */
+        top: -80px; /* Adjust for smaller screens to ensure visibility */
+        flex-direction: column;
+        gap: 0.5rem;
     }
     #timeSlider {
-        height: 200px; /* Shorter on very small screens */
+        width: 200px; /* Shorter on very small screens */
     }
 }
 </style>
 </head>
 <body>
-<div id="sliderContainer">
-    <input type="range" id="timeSlider" min="0" max="1439" step="1" orient="vertical">
-</div>
 <div class="clock-container">
+    <div id="sliderContainer">
+        <input type="range" id="timeSlider" min="0" max="1439" step="1">
+        <input type="number" id="hourInput" min="0" max="23" step="1" placeholder="HH">
+        <span class="colon">:</span>
+        <input type="number" id="minuteInput" min="0" max="59" step="1" placeholder="MM">
+    </div>
     <div class="clock">
         <div class="circle day-ring"></div>
         <div class="circle night-ring"></div>
@@ -336,6 +360,8 @@ const digitalBox = document.getElementById("digitalBox");
 const toggle = document.getElementById("secondsToggle");
 const manualToggle = document.getElementById("manualToggle");
 const timeSlider = document.getElementById("timeSlider");
+const hourInput = document.getElementById("hourInput");
+const minuteInput = document.getElementById("minuteInput");
 const sliderContainer = document.getElementById("sliderContainer");
 const secondsToggleContainer = document.getElementById("secondsToggleContainer");
 const manualToggleContainer = document.getElementById("manualToggleContainer");
@@ -355,9 +381,29 @@ let manualMode = false;
 manualToggle.addEventListener("change", () => {
     manualMode = manualToggle.checked;
     sliderContainer.style.display = manualMode ? "flex" : "none";
+    if (manualMode) {
+        const now = new Date();
+        const h = now.getHours();
+        const m = now.getMinutes();
+        hourInput.value = h;
+        minuteInput.value = m;
+        timeSlider.value = h * 60 + m;
+    }
     updateClock();
 });
 timeSlider.addEventListener("input", updateClock);
+hourInput.addEventListener("input", updateFromInputs);
+minuteInput.addEventListener("input", updateFromInputs);
+function updateFromInputs() {
+    let h = parseInt(hourInput.value) || 0;
+    let m = parseInt(minuteInput.value) || 0;
+    h = Math.max(0, Math.min(23, h));
+    m = Math.max(0, Math.min(59, m));
+    hourInput.value = h;
+    minuteInput.value = m;
+    timeSlider.value = h * 60 + m;
+    updateClock();
+}
 let center, borderW, dayR, nightR, labelR, minuteRingRadius;
 const dayNumbers = [];
 const nightNumbers = [];
@@ -437,17 +483,14 @@ function getTwilightFactor(h, m) {
     const noon = 12 * 60;
     const midnight = 0; // or 24*60, but since minOfDay is 0-1439
     const window = 30; // 30 min fade window
-
     // For noon transition (night to day)
     let dNoon = minOfDay - noon;
     if (dNoon >= -window && dNoon < 0) return (window + dNoon) / window; // fading in day
     if (dNoon >= 0 && dNoon < window) return (dNoon + window) / (2 * window); // but adjust to smooth
-
     // For midnight transition (day to night)
     let dMidnight = (minOfDay < window) ? minOfDay : minOfDay - 1440;
     if (dMidnight >= -window && dMidnight < 0) return 1 - ((window + dMidnight) / window); // fading out day
     if (dMidnight >= 0 && dMidnight < window) return 1 - ((dMidnight + window) / (2 * window)); // adjust
-
     // Full day or night
     return (h >= 12) ? 1 : 0;
 }
@@ -458,6 +501,9 @@ function updateClock() {
         h = Math.floor(mins / 60);
         m = mins % 60;
         s = 0;
+        // Sync inputs
+        hourInput.value = h;
+        minuteInput.value = m;
     } else {
         const now = new Date();
         h = now.getHours();
