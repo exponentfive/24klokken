@@ -283,19 +283,15 @@ input:checked + .slider:before { transform: translateX(20px); }
     cursor: pointer;
     margin-top: -6px;
 }
-#hourInput, #minuteInput {
+#timeInput {
     padding: 0.5rem;
     border-radius: 4px;
     border: 1px solid #2196F3;
     background: #222;
     color: white;
     font-size: 1rem;
-    width: 50px;
+    width: 80px;
     text-align: center;
-}
-.colon {
-    color: white;
-    font-size: 1rem;
 }
 @media (max-width: 480px) {
     #sliderContainer {
@@ -313,9 +309,7 @@ input:checked + .slider:before { transform: translateX(20px); }
 <div class="clock-container">
     <div id="sliderContainer">
         <input type="range" id="timeSlider" min="0" max="1439" step="1">
-        <input type="number" id="hourInput" min="0" max="23" step="1" placeholder="HH">
-        <span class="colon">:</span>
-        <input type="number" id="minuteInput" min="0" max="59" step="1" placeholder="MM">
+        <input type="text" id="timeInput" placeholder="HH:MM">
     </div>
     <div class="clock">
         <div class="circle day-ring"></div>
@@ -360,8 +354,7 @@ const digitalBox = document.getElementById("digitalBox");
 const toggle = document.getElementById("secondsToggle");
 const manualToggle = document.getElementById("manualToggle");
 const timeSlider = document.getElementById("timeSlider");
-const hourInput = document.getElementById("hourInput");
-const minuteInput = document.getElementById("minuteInput");
+const timeInput = document.getElementById("timeInput");
 const sliderContainer = document.getElementById("sliderContainer");
 const secondsToggleContainer = document.getElementById("secondsToggleContainer");
 const manualToggleContainer = document.getElementById("manualToggleContainer");
@@ -383,27 +376,21 @@ manualToggle.addEventListener("change", () => {
     sliderContainer.style.display = manualMode ? "flex" : "none";
     if (manualMode) {
         const now = new Date();
-        const h = now.getHours();
-        const m = now.getMinutes();
-        hourInput.value = h;
-        minuteInput.value = m;
-        timeSlider.value = h * 60 + m;
+        const h = now.getHours().toString().padStart(2, '0');
+        const m = now.getMinutes().toString().padStart(2, '0');
+        timeInput.value = `${h}:${m}`;
     }
     updateClock();
 });
 timeSlider.addEventListener("input", updateClock);
-hourInput.addEventListener("input", updateFromInputs);
-minuteInput.addEventListener("input", updateFromInputs);
-function updateFromInputs() {
-    let h = parseInt(hourInput.value) || 0;
-    let m = parseInt(minuteInput.value) || 0;
-    h = Math.max(0, Math.min(23, h));
-    m = Math.max(0, Math.min(59, m));
-    hourInput.value = h;
-    minuteInput.value = m;
-    timeSlider.value = h * 60 + m;
-    updateClock();
-}
+timeInput.addEventListener("input", () => {
+    const value = timeInput.value;
+    if (/^([01]\d|2[0-3]):([0-5]\d)$/.test(value)) {
+        const [h, m] = value.split(':').map(Number);
+        timeSlider.value = h * 60 + m;
+        updateClock();
+    }
+});
 let center, borderW, dayR, nightR, labelR, minuteRingRadius;
 const dayNumbers = [];
 const nightNumbers = [];
@@ -501,9 +488,8 @@ function updateClock() {
         h = Math.floor(mins / 60);
         m = mins % 60;
         s = 0;
-        // Sync inputs
-        hourInput.value = h;
-        minuteInput.value = m;
+        // Sync timeInput
+        timeInput.value = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
     } else {
         const now = new Date();
         h = now.getHours();
