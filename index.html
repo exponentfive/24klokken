@@ -117,8 +117,33 @@ body {
     font-weight: bold;
     transform: translate(-50%, -50%);
 }
+
 .day-number { color: #222; } /* Dark for better contrast on day */
 .night-number { color: white; }
+
+/* Active hour highlight */
+.number.active-hour {
+    z-index: 9;
+    font-weight: 900;
+    transform: translate(-50%, -50%) scale(1.35);
+    padding: 2px 6px;
+    border-radius: 999px;
+    letter-spacing: 0.5px;
+    opacity: 1 !important;
+}
+
+.day-number.active-hour {
+    color: #0b1020; /* readable against gold-ish highlight */
+    background: rgba(255, 215, 0, 0.9);
+    box-shadow: 0 0 12px rgba(255, 215, 0, 0.6);
+}
+
+.night-number.active-hour {
+    color: #black;
+    background: rgba(74, 108, 255, 0.9);
+    box-shadow: 0 0 12px rgba(23, 50, 173, 0.6);
+}
+
 .minute-tick {
     position: absolute;
     width: 1.5px;
@@ -362,15 +387,22 @@ const dayRing = document.querySelector(".day-ring");
 const nightRing = document.querySelector(".night-ring");
 const centerDiv = document.querySelector(".center");
 const hub = document.querySelector(".hub");
+
 let showSeconds = localStorage.getItem("showSeconds") !== "false";
 toggle.checked = showSeconds;
 secondHand.style.display = showSeconds ? "block" : "none";
+
 toggle.addEventListener("change", () => {
     showSeconds = toggle.checked;
     localStorage.setItem("showSeconds", showSeconds);
     secondHand.style.display = showSeconds ? "block" : "none";
 });
+
 let manualMode = false;
+
+/* NEW: don't overwrite the input while the user is typing in it */
+let isEditingTimeInput = false;
+
 manualToggle.addEventListener("change", () => {
     manualMode = manualToggle.checked;
     sliderContainer.style.display = manualMode ? "flex" : "none";
@@ -379,22 +411,57 @@ manualToggle.addEventListener("change", () => {
         const h = now.getHours().toString().padStart(2, '0');
         const m = now.getMinutes().toString().padStart(2, '0');
         timeInput.value = `${h}:${m}`;
+        timeSlider.value = (now.getHours() * 60) + now.getMinutes();
     }
     updateClock();
 });
-timeSlider.addEventListener("input", updateClock);
-timeInput.addEventListener("input", () => {
-    const value = timeInput.value;
+
+timeSlider.addEventListener("input", () => {
+    if (manualMode) {
+        isEditingTimeInput = false;
+    }
+    updateClock();
+});
+
+timeInput.addEventListener("focus", () => {
+    isEditingTimeInput = true;
+});
+
+timeInput.addEventListener("blur", () => {
+    isEditingTimeInput = false;
+
+    const value = timeInput.value.trim();
     if (/^([01]\d|2[0-3]):([0-5]\d)$/.test(value)) {
         const [h, m] = value.split(':').map(Number);
-        timeSlider.value = h * 60 + m;
+        timeSlider.value = (h * 60) + m;
+    }
+
+    updateClock();
+});
+
+timeInput.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter") {
+        return;
+    }
+
+    e.preventDefault();
+    timeInput.blur();
+});
+
+timeInput.addEventListener("input", () => {
+    const value = timeInput.value.trim();
+    if (/^([01]\d|2[0-3]):([0-5]\d)$/.test(value)) {
+        const [h, m] = value.split(':').map(Number);
+        timeSlider.value = (h * 60) + m;
         updateClock();
     }
 });
+
 let center, borderW, dayR, nightR, labelR, minuteRingRadius;
 const dayNumbers = [];
 const nightNumbers = [];
 const minuteTicks = [];
+
 function initElements() {
     dayNumbers.forEach(n => n.remove());
     nightNumbers.forEach(n => n.remove());
@@ -402,6 +469,7 @@ function initElements() {
     dayNumbers.length = 0;
     nightNumbers.length = 0;
     minuteTicks.length = 0;
+
     for (let i = 0; i < 12; i++) {
         let num = document.createElement("div");
         num.className = "number day-number";
@@ -413,6 +481,7 @@ function initElements() {
         clock.appendChild(num);
         dayNumbers.push(num);
     }
+
     for (let i = 0; i < 12; i++) {
         let num = document.createElement("div");
         num.className = "number night-number";
@@ -424,6 +493,7 @@ function initElements() {
         clock.appendChild(num);
         nightNumbers.push(num);
     }
+
     for (let i = 0; i < 60; i++) {
         let tick = document.createElement("div");
         tick.className = "minute-tick";
@@ -437,6 +507,7 @@ function initElements() {
         minuteTicks.push(tick);
     }
 }
+
 function setSizes() {
     const size = clock.clientWidth;
     center = size / 2;
@@ -448,48 +519,78 @@ function setSizes() {
     nightR = size * 175 / 420;
     labelR = size * 115 / 420;
     minuteRingRadius = minuteRingW / 2;
+
     dayRing.style.width = size + "px";
     dayRing.style.height = size + "px";
     dayRing.style.borderWidth = borderW + "px";
+
     nightRing.style.width = size * 370 / 420 + "px";
     nightRing.style.height = size * 370 / 420 + "px";
     nightRing.style.borderWidth = borderW + "px";
+
     minuteRing.style.width = minuteRingW + "px";
     minuteRing.style.height = minuteRingW + "px";
+
     centerDiv.style.width = centerW + "px";
     centerDiv.style.height = centerW + "px";
+
     hourHand.style.height = size * 120 / 420 + "px";
     minuteHand.style.height = size * 170 / 420 + "px";
     secondHand.style.height = size * 185 / 420 + "px";
+
     hub.style.width = hubS + "px";
     hub.style.height = hubS + "px";
+
     initElements();
 }
+
 function getTwilightFactor(h, m) {
     const minOfDay = h * 60 + m;
     const noon = 12 * 60;
-    const midnight = 0; // or 24*60, but since minOfDay is 0-1439
     const window = 30; // 30 min fade window
+
     // For noon transition (night to day)
     let dNoon = minOfDay - noon;
     if (dNoon >= -window && dNoon < 0) return (window + dNoon) / window; // fading in day
     if (dNoon >= 0 && dNoon < window) return (dNoon + window) / (2 * window); // but adjust to smooth
+
     // For midnight transition (day to night)
     let dMidnight = (minOfDay < window) ? minOfDay : minOfDay - 1440;
     if (dMidnight >= -window && dMidnight < 0) return 1 - ((window + dMidnight) / window); // fading out day
     if (dMidnight >= 0 && dMidnight < window) return 1 - ((dMidnight + window) / (2 * window)); // adjust
+
     // Full day or night
     return (h >= 12) ? 1 : 0;
 }
+
+function updateActiveHour(h) {
+    dayNumbers.forEach(n => n.classList.remove("active-hour"));
+    nightNumbers.forEach(n => n.classList.remove("active-hour"));
+
+    if (h >= 12) {
+        const dayIndex = h - 12; // 12->0 ... 23->11
+        const el = dayNumbers[dayIndex];
+        if (el) el.classList.add("active-hour");
+    } else {
+        const nightIndex = h; // 0->0 ... 11->11
+        const el = nightNumbers[nightIndex];
+        if (el) el.classList.add("active-hour");
+    }
+}
+
 function updateClock() {
     let h, m, s;
+
     if (manualMode) {
         const mins = parseInt(timeSlider.value);
         h = Math.floor(mins / 60);
         m = mins % 60;
         s = 0;
-        // Sync timeInput
-        timeInput.value = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+
+        // CHANGED: only sync the text box when user isn't editing it
+        if (!isEditingTimeInput) {
+            timeInput.value = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+        }
     } else {
         const now = new Date();
         h = now.getHours();
@@ -497,21 +598,30 @@ function updateClock() {
         s = now.getSeconds();
         timeSlider.value = h * 60 + m;
     }
+
+    updateActiveHour(h);
+
     const hDeg = ((h % 12) + m / 60 + s / 3600) * 30;
     const mDeg = (m + s / 60) * 6;
     const sDeg = s * 6;
+
     hourHand.style.transform = `translateX(-50%) rotate(${hDeg}deg)`;
     minuteHand.style.transform = `translateX(-50%) rotate(${mDeg}deg)`;
+
     if (showSeconds) {
         secondHand.style.transform = `translateX(-50%) rotate(${sDeg}deg)`;
     }
+
     const colon = (s % 2 === 0) ? ":" : " ";
     digital.textContent = String(h).padStart(2, "0") + colon + String(m).padStart(2, "0");
+
     const tf = getTwilightFactor(h, m);
+
     dayRing.style.opacity = 0.15 + 0.85 * tf;
     dayRing.style.boxShadow = `0 0 ${10 + 30 * tf}px rgba(255,200,50,${0.2 + 0.5 * tf})`;
     nightRing.style.opacity = 0.15 + 0.85 * (1 - tf);
     nightRing.style.boxShadow = `0 0 ${10 + 30 * (1 - tf)}px rgba(80,120,255,${0.2 + 0.5 * (1 - tf)})`;
+
     const fromR = Math.round(42 * tf + 10 * (1 - tf));
     const fromG = Math.round(34 * tf + 19 * (1 - tf));
     const fromB = Math.round(8 * tf + 48 * (1 - tf));
@@ -519,59 +629,71 @@ function updateClock() {
     const toG = Math.round(15 * tf + 7 * (1 - tf));
     const toB = Math.round(15 * tf + 15 * (1 - tf));
     document.body.style.background = `radial-gradient(circle at center, rgb(${fromR},${fromG},${fromB}) 0%, rgb(${toR},${toG},${toB}) 70%)`;
+
     modeLabel.textContent = (h >= 12) ? "DAG/KVELD" : "NATT/MORGEN";
     hourHand.style.background = (tf > 0.5) ? '#ffd700' : '#4a6cff';
+
     const minFrac = (m + s / 60) / 60;
     minuteRing.style.background = `conic-gradient(#aaaaaa ${minFrac * 360}deg, rgba(255,255,255,0.08) ${minFrac * 360}deg)`;
+
     const rad = (mDeg - 90) * Math.PI / 180;
     minuteLabel.style.left = center + labelR * Math.cos(rad) + "px";
     minuteLabel.style.top = center + labelR * Math.sin(rad) + "px";
     minuteLabel.textContent = String(m).padStart(2, "0");
-    // Adjust opacities for numbers
+
     dayNumbers.forEach(n => n.style.opacity = 0.15 + 0.85 * tf);
     nightNumbers.forEach(n => n.style.opacity = 0.15 + 0.85 * (1 - tf));
-    // Theme colors
+
     const textR = Math.round(255 * tf + 185 * (1 - tf));
     const textG = Math.round(215 * tf + 242 * (1 - tf));
     const textB = Math.round(0 * tf + 255 * (1 - tf));
     const textColor = `rgb(${textR},${textG},${textB})`;
+
     const shadowR = Math.round(255 * tf + 0 * (1 - tf));
     const shadowG = Math.round(200 * tf + 160 * (1 - tf));
     const shadowB = Math.round(50 * tf + 255 * (1 - tf));
+
     const borderR = Math.round(255 * tf + 120 * (1 - tf));
     const borderG = Math.round(200 * tf + 190 * (1 - tf));
     const borderB = Math.round(50 * tf + 255 * (1 - tf));
+
     const bgFromR = Math.round(44 * tf + 8 * (1 - tf));
     const bgFromG = Math.round(34 * tf + 18 * (1 - tf));
     const bgFromB = Math.round(8 * tf + 44 * (1 - tf));
     const bgToR = Math.round(26 * tf + 4 * (1 - tf));
     const bgToG = Math.round(20 * tf + 10 * (1 - tf));
     const bgToB = Math.round(4 * tf + 26 * (1 - tf));
-    // Apply to elements
+
     modeLabel.style.color = textColor;
     modeLabel.style.background = `linear-gradient(180deg, rgba(${bgFromR},${bgFromG},${bgFromB},0.90) 0%, rgba(${bgToR},${bgToG},${bgToB},0.90) 100%)`;
     modeLabel.style.border = `1px solid rgba(${borderR},${borderG},${borderB},0.18)`;
     modeLabel.style.boxShadow = `0 0 14px rgba(${shadowR},${shadowG},${shadowB},0.18), inset 0 0 10px rgba(${shadowR},${shadowG},${shadowB},0.12)`;
+
     digital.style.color = textColor;
     digital.style.textShadow = `0 0 8px rgba(${shadowR},${shadowG},${shadowB},0.85), 0 0 22px rgba(${shadowR},${shadowG},${shadowB},0.55)`;
+
     digitalBox.style.background = `linear-gradient(180deg, rgba(${bgFromR},${bgFromG},${bgFromB},0.95) 0%, rgba(${bgToR},${bgToG},${bgToB},0.95) 100%)`;
     digitalBox.style.border = `1px solid rgba(${borderR},${borderG},${borderB},0.18)`;
     digitalBox.style.boxShadow = `0 0 22px rgba(${shadowR},${shadowG},${shadowB},0.22), inset 0 0 14px rgba(${shadowR},${shadowG},${shadowB},0.18)`;
+
     minuteLabel.style.color = textColor;
     minuteLabel.style.background = `rgba(${bgToR},${bgToG},${bgToB},0.78)`;
     minuteLabel.style.border = `1px solid rgba(${borderR},${borderG},${borderB},0.22)`;
     minuteLabel.style.boxShadow = `0 0 10px rgba(${shadowR},${shadowG},${shadowB},0.35), inset 0 0 8px rgba(${shadowR},${shadowG},${shadowB},0.18)`;
+
     secondsToggleContainer.style.color = textColor;
     manualToggleContainer.style.color = textColor;
-    // Minute ticks tint
+
     const tickR = Math.round(255 * tf + 255 * (1 - tf));
     const tickG = Math.round(255 * tf + 255 * (1 - tf));
     const tickB = Math.round(255 * tf + 255 * (1 - tf));
     minuteTicks.forEach(t => t.style.background = `rgba(${tickR},${tickG},${tickB},0.75)`);
 }
+
 setSizes();
 updateClock();
 setInterval(updateClock, 200);
+
 window.addEventListener("resize", () => {
     setSizes();
     updateClock();
